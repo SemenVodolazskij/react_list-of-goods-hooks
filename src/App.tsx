@@ -27,15 +27,16 @@ function sortGoods(
   reverse: boolean,
 ): string[] {
   const sortedGoods = [...goods].sort((good1, good2) => {
-    if (sortType === SortType.Alphabetically) {
-      return good1.localeCompare(good2);
-    }
+    switch (sortType) {
+      case SortType.Alphabetically:
+        return good1.localeCompare(good2);
 
-    if (sortType === SortType.ByLength) {
-      return good1.length - good2.length;
-    }
+      case SortType.ByLength:
+        return good1.length - good2.length;
 
-    return 0;
+      default:
+        return 0;
+    }
   });
 
   return reverse ? sortedGoods.reverse() : sortedGoods;
@@ -43,14 +44,23 @@ function sortGoods(
 
 export const App: React.FC = () => {
   const [sort, setSort] = useState<SortType | null>(null);
-  const [reverse, setReverse] = useState<boolean>(false);
+  const [isReverse, setIsReverse] = useState<boolean>(false);
 
-  const isResetButtonVisible = sort || reverse;
+  const isResetButtonVisible = sort || isReverse;
 
   const resultSortedGoods =
-    sort || reverse
-      ? sortGoods(goodsFromServer, sort, reverse)
+    sort || isReverse
+      ? sortGoods(goodsFromServer, sort, isReverse)
       : goodsFromServer;
+
+  const handleToggleSortType = (type: SortType) => {
+    setSort(type === sort ? null : type);
+  };
+
+  const handleReset = () => {
+    setIsReverse(false);
+    setSort(null);
+  };
 
   return (
     <div className="section content">
@@ -60,13 +70,7 @@ export const App: React.FC = () => {
           className={classNames('button', 'is-info', {
             'is-light': sort !== SortType.Alphabetically,
           })}
-          onClick={() => {
-            if (sort === SortType.Alphabetically) {
-              return setSort(null);
-            } else {
-              return setSort(SortType.Alphabetically);
-            }
-          }}
+          onClick={() => handleToggleSortType(SortType.Alphabetically)}
         >
           Sort alphabetically
         </button>
@@ -76,13 +80,7 @@ export const App: React.FC = () => {
           className={classNames('button', 'is-success', {
             'is-light': sort !== SortType.ByLength,
           })}
-          onClick={() => {
-            if (sort === SortType.ByLength) {
-              return setSort(null);
-            } else {
-              return setSort(SortType.ByLength);
-            }
-          }}
+          onClick={() => handleToggleSortType(SortType.ByLength)}
         >
           Sort by length
         </button>
@@ -90,9 +88,9 @@ export const App: React.FC = () => {
         <button
           type="button"
           className={classNames('button', 'is-warning', {
-            'is-light': !reverse,
+            'is-light': !isReverse,
           })}
-          onClick={() => setReverse(!reverse)}
+          onClick={() => setIsReverse(!isReverse)}
         >
           Reverse
         </button>
@@ -100,10 +98,7 @@ export const App: React.FC = () => {
           <button
             type="button"
             className="button is-danger is-light"
-            onClick={() => {
-              setReverse(false);
-              setSort(null);
-            }}
+            onClick={handleReset}
           >
             Reset
           </button>
