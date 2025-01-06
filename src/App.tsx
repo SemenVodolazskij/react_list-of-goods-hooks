@@ -19,6 +19,7 @@ export const goodsFromServer = [
 enum SortType {
   ByLength = 'ByLength',
   Alphabetically = 'Alphabetically',
+  Default = '',
 }
 
 function sortGoods(
@@ -43,23 +44,20 @@ function sortGoods(
 }
 
 export const App: React.FC = () => {
-  const [sort, setSort] = useState<SortType | null>(null);
-  const [isReverse, setIsReverse] = useState<boolean>(false);
+  const [sort, setSort] = useState<SortType>(SortType.Default);
+  const [isReversed, setIsReversed] = useState<boolean>(false);
 
-  const isResetButtonVisible = sort || isReverse;
+  const isResetButtonVisible = sort || isReversed;
 
-  const resultSortedGoods =
-    sort || isReverse
-      ? sortGoods(goodsFromServer, sort, isReverse)
-      : goodsFromServer;
+  const resultSortedGoods = sortGoods(goodsFromServer, sort, isReversed);
 
   const handleToggleSortType = (type: SortType) => {
-    setSort(type === sort ? null : type);
+    setSort(type === sort ? SortType.Default : type);
   };
 
   const handleReset = () => {
-    setIsReverse(false);
-    setSort(null);
+    setIsReversed(false);
+    setSort(SortType.Default);
   };
 
   return (
@@ -88,9 +86,9 @@ export const App: React.FC = () => {
         <button
           type="button"
           className={classNames('button', 'is-warning', {
-            'is-light': !isReverse,
+            'is-light': !isReversed,
           })}
-          onClick={() => setIsReverse(!isReverse)}
+          onClick={() => setIsReversed(prev => !prev)}
         >
           Reverse
         </button>
